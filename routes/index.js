@@ -21,7 +21,7 @@ router.get('/new', (req, res, next) => {
   res.render("new", { title : "Add New Data"} )
 })
 
-/* POST New page */
+/* POST Create New page */
 router.post('/new', (req, res, next) => {
   var myData = {
     "name" : req.body.name,
@@ -59,9 +59,9 @@ router.get('/view', function(req, res, next) {
 
   // Find All Documents from https://github.com/mongodb/node-mongodb-native
   const findDocuments = function(db, callback) {
-    // Get the documents collection
+    // Get the users collection
     const collection = db.collection('user');
-    // Find some documents
+    // Find some users
     collection.find({}).toArray(function(err, docs) {
       assert.equal(err, null);
       // console.log("Found the following records");
@@ -73,10 +73,7 @@ router.get('/view', function(req, res, next) {
   // Use connect method to connect to the server
   MongoClient.connect(url, function(err, client) {
     assert.equal(null, err);
-    // console.log("Connected correctly to server");
-
     const db = client.db(dbName);
-
       findDocuments(db, function(viewData) {
         res.render('view', { title: 'View my data', userData : viewData} )
         // console.log(viewData)
@@ -113,9 +110,68 @@ router.get('/delete/:deleteid', function(req, res, next) {
       });
   });
 
-  // res.redirect('/view')
-  // res.render('index', { title: 'Express' });
 });
+
+/* Update data */
+
+  // Get data
+  router.get('/update/:updatedid', (req, res, next) =>{
+    var updatedid = convertToObjectId(req.params.updatedid);
+    
+    // Find user with a Query Filter (https://github.com/mongodb/node-mongodb-native)
+    const findDocuments = function(db, callback) {
+      // Get the user collection
+      const collection = db.collection('user');
+      // Find some users
+      collection.find({ _id : updatedid }).toArray(function(err, docs) {
+        assert.equal(err, null);
+        console.log("Found the following records");
+        callback(docs);
+      });
+    }
+
+  // Use connect method to connect to the server
+  MongoClient.connect(url, function(err, client) {
+    assert.equal(null, err);
+    const db = client.db(dbName);
+      findDocuments(db, function(viewData) {
+        res.render('update', { title: 'Update my data', userData : viewData} )
+        console.log(viewData)
+        client.close();
+      });
+    });
+  })
+
+  // Update data in db 
+  router.post("/update/:updatedid", (req, res, next) => {
+    var updateid = convertToObjectId(req.params.updatedid);
+    var myData = {
+      "name" : req.body.name,
+      "phone" : req.body.phone
+    }
+
+    // Update a document (https://github.com/mongodb/node-mongodb-native)
+    const updateDocument = function(db, callback) {
+      const collection = db.collection('user');
+      collection.updateOne({ _id : updateid }
+        , { $set: myData }, function(err, result) {
+        assert.equal(err, null);
+        assert.equal(1, result.result.n);
+        console.log("Updated the document with the field a equal to 2");
+        callback(result);
+      });  
+    }
+
+    // Connect to Mongo to update - Use connect method to connect to the server
+    MongoClient.connect(url, function(err, client) {
+      assert.equal(null, err);
+      const db = client.db(dbName);
+      updateDocument(db, function() {
+          client.close();
+          res.redirect("/view")
+        });
+      });   
+  })
 
 
 module.exports = router;
