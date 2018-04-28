@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const MongoClient = require('mongodb').MongoClient;
-var praseToObjectId = require('mongodb').ObjectID;
+var convertToObjectId = require('mongodb').ObjectID;
 
 const assert = require('assert');
 
@@ -64,7 +64,7 @@ router.get('/view', function(req, res, next) {
     // Find some documents
     collection.find({}).toArray(function(err, docs) {
       assert.equal(err, null);
-      console.log("Found the following records");
+      // console.log("Found the following records");
       console.log(docs)
       callback(docs);
     });
@@ -73,17 +73,49 @@ router.get('/view', function(req, res, next) {
   // Use connect method to connect to the server
   MongoClient.connect(url, function(err, client) {
     assert.equal(null, err);
-    console.log("Connected correctly to server");
+    // console.log("Connected correctly to server");
 
     const db = client.db(dbName);
 
       findDocuments(db, function(viewData) {
         res.render('view', { title: 'View my data', userData : viewData} )
-        console.log(viewData)
+        // console.log(viewData)
         client.close();
       });
     });
   });
+
+/* Delete data in View page. */
+router.get('/delete/:deleteid', function(req, res, next) {
+  var deleteid = convertToObjectId(req.params.deleteid);
+
+  // Delete function
+  const removeContact = function(db, callback) {
+    // Get the user collection
+    const collection = db.collection('user');
+    // Delete document where _id is deleteid
+    collection.deleteOne({ _id : deleteid }, function(err, result) {
+      assert.equal(err, null);
+      console.log("successfully deleted")
+      callback(result);
+      
+    });    
+  }
+
+  // Connect Mongo to delete
+  // Use connect method to connect to the server
+  MongoClient.connect(url, function(err, client) {
+    assert.equal(null, err);
+    const db = client.db(dbName);
+      removeContact(db, function() {
+        client.close();
+        res.redirect('/view')
+      });
+  });
+
+  // res.redirect('/view')
+  // res.render('index', { title: 'Express' });
+});
 
 
 module.exports = router;
