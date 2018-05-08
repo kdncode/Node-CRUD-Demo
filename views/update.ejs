@@ -6,8 +6,7 @@
             </div>
 
             <% userData.forEach(function(anotherUserData){ %>
-                <form action="/update/<%= anotherUserData._id %>" method="post">
-                    
+                <form action="/update/<%= anotherUserData._id %>" method="post">      
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input value="<%= anotherUserData.name %>" type="text" class="form-control" name="name" id="" aria-describedby="helpId" placeholder="Name">
@@ -20,7 +19,6 @@
                         
                         <button type="submit" class="btn btn-success">Update</button>
                         <a class="btn btn-primary" href="/view" role="button">View data</a>
-
                 </form>                
             <% }) %>
         </div>
