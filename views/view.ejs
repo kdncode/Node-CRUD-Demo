@@ -21,17 +21,13 @@
                           <td scope="row"> <%= oneUserData.name %> </td>
                           <td> <%= oneUserData.phone %> </td>
                           <td>
-                            
                             <a href="/update/<%= oneUserData._id %>">
                                 <i class="fa fa-edit"></i> 
                             </a>
-
                             <a onclick="return deleteOrNot('Do you want to delete?');" href="/delete/<%= oneUserData._id %>">
                                 <i class="fa fa-remove"></i>
                             </a> 
-
                           </td>
-
                       </tr>
                     <% }) %>
                   </tbody>
